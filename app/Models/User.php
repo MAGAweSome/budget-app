@@ -62,4 +62,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Category::class);
     }
+
+    /**
+     * A user can have many allocations.
+     */
+    public function allocations()
+    {
+        return $this->hasMany(Allocation::class);
+    }
 }

@@ -1,0 +1,28 @@
+<?php
+
+namespace App\Policies;
+
+use App\Models\Allocation;
+use App\Models\User;
+use Illuminate\Auth\Access\HandlesAuthorization;
+
+class AllocationPolicy
+{
+    use HandlesAuthorization;
+
+    /**
+     * Determine whether the user can update the model.
+     */
+    public function update(User $user, Allocation $allocation)
+    {
+        return $user->id === $allocation->user_id;
+    }
+
+    /**
+     * Determine whether the user can delete the model.
+     */
+    public function delete(User $user, Allocation $allocation)
+    {
+        return $user->id === $allocation->user_id;
+    }
+}

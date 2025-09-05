@@ -24,3 +24,4 @@ Route::get('/user/incomes', [DashboardController::class, 'getIncomes'])
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
 require __DIR__.'/categories.php';
+require __DIR__.'/allocations.php';
