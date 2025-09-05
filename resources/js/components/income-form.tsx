@@ -19,7 +19,7 @@ const IncomeForm: React.FC<IncomeFormProps> = ({ show, onClose, onIncomeAdded })
     const [formData, setFormData] = useState<IncomeData>({
         name: '',
         amount: '',
-        frequency: 'monthly', // Set a default value.
+        frequency: 'bi-weekly', // Set a default value.
     });
     // State for managing UI feedback like loading and success messages.
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -29,10 +29,45 @@ const IncomeForm: React.FC<IncomeFormProps> = ({ show, onClose, onIncomeAdded })
     // This function handles changes to the form inputs.
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        setFormData(prevState => ({
-            ...prevState,
-            [name]: name === 'amount' ? parseFloat(value) : value,
-        }));
+
+        if (name === 'amount') {
+            const [integer, decimal] = value.split('.');
+            let sanitizedInteger = integer.replace(/[^0-9]/g, '');
+            let formattedInteger = new Intl.NumberFormat('en-US').format(parseInt(sanitizedInteger || '0', 10));
+
+            if (sanitizedInteger === '0' && value !== '0') {
+                formattedInteger = '';
+            }
+
+            let newValue = formattedInteger;
+            if (decimal !== undefined) {
+                newValue += `.${decimal.replace(/[^0-9]/g, '')}`;
+            }
+
+            setFormData({ ...formData, amount: newValue });
+        } else {
+            setFormData(prevState => ({
+                ...prevState,
+                [name]: value,
+            }));
+        }
+    };
+
+    const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+        const { value } = e.target;
+        if (value === '') return;
+
+        const [integerPart, decimalPart] = value.split('.');
+
+        let sanitizedInteger = integerPart.replace(/[^0-9]/g, '');
+        const formattedInteger = new Intl.NumberFormat('en-US').format(parseInt(sanitizedInteger || '0', 10));
+
+        let formattedDecimal = '00';
+        if (decimalPart !== undefined) {
+            formattedDecimal = decimalPart.padEnd(2, '0').slice(0, 2);
+        }
+
+        setFormData({ ...formData, amount: `${formattedInteger}.${formattedDecimal}` });
     };
 
     // This function handles form submission.
@@ -50,6 +85,12 @@ const IncomeForm: React.FC<IncomeFormProps> = ({ show, onClose, onIncomeAdded })
         }
 
         try {
+            const amountAsNumber = parseFloat(String(formData.amount).replace(/,/g, ''));
+            const dataToSend = {
+                ...formData,
+                amount: amountAsNumber,
+            };
+
             // Send the form data to our API endpoint.
             const response = await fetch('/incomes', {
                 method: 'POST',
@@ -57,7 +98,7 @@ const IncomeForm: React.FC<IncomeFormProps> = ({ show, onClose, onIncomeAdded })
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
                 },
-                body: JSON.stringify(formData),
+                body: JSON.stringify(dataToSend),
             });
 
             const data = await response.json();
@@ -67,10 +108,10 @@ const IncomeForm: React.FC<IncomeFormProps> = ({ show, onClose, onIncomeAdded })
             }
 
             // On success, show a success message and reset the form.
-            setMessage('Income added successfully!');
+                        setMessage('Income added successfully!');
             setIsSuccess(true);
-            setFormData({ name: '', amount: '', frequency: 'monthly' });
-            onIncomeAdded(); // Call the callback to tell the parent to refresh.
+            setFormData({ name: '', amount: '', frequency: 'bi-weekly' });
+            onIncomeAdded(); // Call the callback to tell the parent to refresh。
 
         } catch (error: any) {
             console.error('Submission error:', error);
@@ -88,14 +129,14 @@ const IncomeForm: React.FC<IncomeFormProps> = ({ show, onClose, onIncomeAdded })
 
     return (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
-            <div className="relative p-8 bg-white w-full max-w-md m-4 rounded-xl shadow-lg">
+            <div className="relative p-8 bg-background w-full max-w-md m-4 rounded-xl shadow-lg">
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold"
+                    className="absolute top-4 right-4 text-muted-foreground hover:text-foreground text-2xl font-bold"
                 >
                     &times;
                 </button>
-                <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Add New Income</h2>
+                <h2 className="text-2xl font-bold text-center text-foreground mb-6">Add New Income</h2>
                 
                 {/* Display messages to the user */}
                 {message && (
@@ -106,46 +147,52 @@ const IncomeForm: React.FC<IncomeFormProps> = ({ show, onClose, onIncomeAdded })
 
                 <form onSubmit={handleSubmit}>
                     <div className="mb-4">
-                        <label htmlFor="name" className="block text-gray-700 font-medium mb-1">Income Name</label>
+                        <label htmlFor="name" className="block text-muted-foreground font-medium mb-1">Income Name</label>
                         <input
                             type="text"
                             id="name"
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="e.g., Salary, Freelance"
+                            className="w-full px-4 py-2 bg-transparent border-border border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                            placeholder="Salary, Freelance"
                             required
                         />
                     </div>
                     <div className="mb-4">
-                        <label htmlFor="amount" className="block text-gray-700 font-medium mb-1">Amount ($)</label>
-                        <input
-                            type="number"
-                            id="amount"
-                            name="amount"
-                            value={formData.amount}
-                            onChange={handleChange}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="e.g., 2500.00"
-                            step="0.01"
-                            required
-                        />
+                        <label htmlFor="amount" className="block text-muted-foreground font-medium mb-1">Amount</label>
+                        <div className="relative">
+                            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">
+                                $
+                            </span>
+                            <input
+                                type="text"
+                                id="amount"
+                                name="amount"
+                                value={formData.amount}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                className="w-full pl-7 pr-4 py-2 bg-transparent border-border border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                                placeholder="2,500.00"
+                                step="1"
+                                required
+                            />
+                        </div>
                     </div>
                     <div className="mb-6">
-                        <label htmlFor="frequency" className="block text-gray-700 font-medium mb-1">Frequency</label>
+                        <label htmlFor="frequency" className="block text-muted-foreground font-medium mb-1">Frequency</label>
                         <select
                             id="frequency"
                             name="frequency"
                             value={formData.frequency}
                             onChange={handleChange}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-4 py-2 bg-transparent border-border border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                             required
                         >
-                            <option value="monthly">Monthly</option>
-                            <option value="bi-weekly">Bi-weekly</option>
-                            <option value="weekly">Weekly</option>
-                            <option value="one-time">One-time</option>
+                            <option className="bg-background text-foreground" value="bi-weekly">Bi-weekly</option>
+                            <option className="bg-background text-foreground" value="monthly">Monthly</option>
+                            <option className="bg-background text-foreground" value="weekly">Weekly</option>
+                            <option className="bg-background text-foreground" value="one-time">One-time</option>
                         </select>
                     </div>
                     <button
