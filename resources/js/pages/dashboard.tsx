@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import IncomeForm from '../components/income-form';
+import CategoryForm from '../components/category-form';
 
 // A single type for all income data.
 interface Income {
@@ -9,12 +10,20 @@ interface Income {
     frequency: string;
 }
 
+interface Category {
+    id: number;
+    name: string;
+    type: string;
+}
+
 const Dashboard: React.FC = () => {
     // State to hold the list of incomes and the total.
     const [incomes, setIncomes] = useState<Income[]>([]);
     const [totalIncome, setTotalIncome] = useState<number>(0);
     // State to control the visibility of the income form modal.
     const [showModal, setShowModal] = useState(false);
+    const [showCategoryModal, setShowCategoryModal] = useState(false);
+    const [categories, setCategories] = useState<Category[]>([]);
     // State to handle loading status.
     const [isLoading, setIsLoading] = useState(false);
     // State to handle any fetch errors.
@@ -53,10 +62,24 @@ const Dashboard: React.FC = () => {
             setIsLoading(false);
         }
     };
+
+    const fetchCategories = async () => {
+        try {
+            const response = await fetch('/categories');
+            if (!response.ok) {
+                throw new Error('Failed to fetch categories.');
+            }
+            const data = await response.json();
+            setCategories(data);
+        } catch (error: any) {
+            console.error('Error fetching categories:', error);
+        }
+    };
     
-    // Fetch incomes when the component first loads.
+    // Fetch incomes and categories when the component first loads.
     useEffect(() => {
         fetchIncomes();
+        fetchCategories();
     }, []);
 
     const handleIncomeAdded = () => {
@@ -64,6 +87,13 @@ const Dashboard: React.FC = () => {
         fetchIncomes();
         // Close the modal.
         setShowModal(false);
+    };
+
+    const handleCategoryAdded = () => {
+        // Refresh the categories list after a successful form submission.
+        fetchCategories();
+        // Close the modal.
+        setShowCategoryModal(false);
     };
 
     return (
@@ -78,7 +108,7 @@ const Dashboard: React.FC = () => {
                            const form = document.getElementById('logout-form') as HTMLFormElement;
                            form?.submit();
                        }} 
-                       className="text-blue-600 font-medium hover:text-blue-800 transition-colors">
+                       className="text-blue-600 font-medium hover:text-blue-800 transition-colors cursor-pointer">
                         Log Out
                     </a>
                 </nav>
@@ -135,7 +165,25 @@ const Dashboard: React.FC = () => {
                 {/* Other placeholder cards */}
                 <div className="bg-white p-6 rounded-xl shadow-lg transform transition-transform hover:scale-105">
                     <h2 className="text-lg font-semibold text-gray-700 mb-4">Categories</h2>
-                    <p className="text-sm text-gray-500">Add categories to get started.</p>
+                    {categories.length > 0 ? (
+                        <div className="space-y-2 mb-4">
+                            {categories.map(category => (
+                                <div key={category.id} className="flex justify-between items-center">
+                                    <span className="text-gray-800 font-medium">{category.name}</span>
+                                    <span className="text-gray-600 text-sm">{category.type.charAt(0).toUpperCase() + category.type.slice(1)}</span>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <p className="text-sm text-gray-500 mb-4">No categories found. Add one to get started.</p>
+                    )}
+                    <button
+                        onClick={() => setShowCategoryModal(true)}
+                        className="w-full py-2 px-4 rounded-md text-white font-semibold transition-colors duration-200 mt-6
+                        bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    >
+                        Add Category
+                    </button>
                 </div>
                 
                 <div className="bg-white p-6 rounded-xl shadow-lg transform transition-transform hover:scale-105">
@@ -149,6 +197,11 @@ const Dashboard: React.FC = () => {
                 show={showModal}
                 onClose={() => setShowModal(false)}
                 onIncomeAdded={handleIncomeAdded}
+            />
+            <CategoryForm
+                show={showCategoryModal}
+                onClose={() => setShowCategoryModal(false)}
+                onCategoryAdded={handleCategoryAdded}
             />
         </div>
     );

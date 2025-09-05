@@ -6,16 +6,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Models\Income; // Don't forget to import the Income model!
+use App\Models\Category; // Import the Category model
 
 class User extends Authenticatable
 {
+    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
      *
-     * @var list<string>
+     * @var array<int, string>
      */
     protected $fillable = [
         'name',
@@ -26,7 +27,7 @@ class User extends Authenticatable
     /**
      * The attributes that should be hidden for serialization.
      *
-     * @var list<string>
+     * @var array<int, string>
      */
     protected $hidden = [
         'password',
@@ -52,5 +53,13 @@ class User extends Authenticatable
     public function incomes()
     {
         return $this->hasMany(Income::class);
+    }
+
+    /**
+     * A user can have many categories.
+     */
+    public function categories()
+    {
+        return $this->hasMany(Category::class);
     }
 }

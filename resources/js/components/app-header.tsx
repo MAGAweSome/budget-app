@@ -82,7 +82,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                                     href={typeof item.href === 'string' ? item.href : item.href.url}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="flex items-center space-x-2 font-medium"
+                                                    className="flex items-center space-x-2 font-medium cursor-pointer"
                                                 >
                                                     {item.icon && <Icon iconNode={item.icon} className="h-5 w-5" />}
                                                     <span>{item.title}</span>
@@ -139,7 +139,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                                     href={typeof item.href === 'string' ? item.href : item.href.url}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="group ml-1 inline-flex h-9 w-9 items-center justify-center rounded-md bg-transparent p-0 text-sm font-medium text-accent-foreground ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
+                                                    className="group ml-1 inline-flex h-9 w-9 items-center justify-center rounded-md bg-transparent p-0 text-sm font-medium text-accent-foreground ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 cursor-pointer"
                                                 >
                                                     <span className="sr-only">{item.title}</span>
                                                     {item.icon && <Icon iconNode={item.icon} className="size-5 opacity-80 group-hover:opacity-100" />}

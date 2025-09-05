@@ -23,3 +23,4 @@ Route::get('/user/incomes', [DashboardController::class, 'getIncomes'])
 // The following route files will be loaded as well.
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
+require __DIR__.'/categories.php';

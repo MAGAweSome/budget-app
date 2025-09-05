@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Category;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -41,6 +42,19 @@ class RegisteredUserController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
+
+        // Create default categories for the new user
+        $defaultCategories = [
+            ['name' => 'Housing', 'type' => 'spending'],
+            ['name' => 'Groceries', 'type' => 'spending'],
+            ['name' => 'Transportation', 'type' => 'spending'],
+            ['name' => 'Emergency Fund', 'type' => 'savings'],
+            ['name' => 'Future Savings', 'type' => 'savings'],
+        ];
+
+        foreach ($defaultCategories as $category) {
+            $user->categories()->create($category);
+        }
 
         event(new Registered($user));
 
