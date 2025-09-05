@@ -40,3 +40,10 @@ export interface User {
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
 }
+
+import { PageProps as InertiaPageProps } from '@inertiajs/core';
+
+export interface PageProps extends InertiaPageProps {
+    auth: Auth;
+    // You can add other common Inertia props here if needed, e.g., errors: Errors;
+}
