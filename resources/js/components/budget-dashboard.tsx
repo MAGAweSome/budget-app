@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import IncomeForm from '../components/income-form';
+import IncomeForm from './income-form';
 
 // A single type for all income data.
 interface Income {
@@ -9,7 +9,7 @@ interface Income {
     frequency: string;
 }
 
-const Dashboard: React.FC = () => {
+const BudgetDashboard: React.FC = () => {
     // State to hold the list of incomes and the total.
     const [incomes, setIncomes] = useState<Income[]>([]);
     const [totalIncome, setTotalIncome] = useState<number>(0);
@@ -154,4 +154,4 @@ const Dashboard: React.FC = () => {
     );
 };
 
-export default Dashboard;
+export default BudgetDashboard;

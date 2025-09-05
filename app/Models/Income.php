@@ -2,7 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory; // This is the missing line.
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
+use App\Models\Allocation;
 
 class Income extends Model
 {
